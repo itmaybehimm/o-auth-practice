@@ -7,9 +7,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schema/user.schema';
-import { RegisterUserDto } from './dto/register-user.dto';
+import { RegisterUserDto, RegisterUserOAuthDto } from './dto/register-user.dto';
 import { UserResponseDto } from './dto/user.response';
 import { plainToClass } from 'class-transformer';
+import { RegistrationMethod } from 'src/enums/users/registration-method.enum';
 
 @Injectable()
 export class UserService {
@@ -17,20 +18,40 @@ export class UserService {
 
   async create(registerUserDto: RegisterUserDto): Promise<UserResponseDto> {
     const user = await this.userModel.findOne({
-      username: registerUserDto.username,
+      email: registerUserDto.email,
     });
 
     if (user) {
       throw new BadRequestException('User already exists');
     }
 
-    const createdUser = await this.userModel.create(registerUserDto);
+    const createdUser = await this.userModel.create({
+      ...registerUserDto,
+      registrationMethod: RegistrationMethod.LOCAL,
+    });
     return this.mapToUserResponse(createdUser); // Using mapToUserResponse to transform the response
+  }
+
+  async create_o_auth(
+    registerUserOAuthDto: RegisterUserOAuthDto,
+  ): Promise<UserDocument> {
+    const user = await this.userModel.findOne({
+      email: registerUserOAuthDto.email,
+    });
+
+    if (user) {
+      throw new BadRequestException('User already exists');
+    }
+
+    const createdUser = await this.userModel.create({
+      ...registerUserOAuthDto,
+    });
+    return createdUser; // Using mapToUserResponse to transform the response
   }
 
   async update(user: Partial<User>): Promise<UserDocument> {
     const updatedUser = await this.userModel.findOneAndUpdate(
-      { username: user.username }, // Find user by username
+      { email: user.email }, // Find user by username
       user, // Update with new user data
       { new: true, useFindAndModify: false }, // Options: return the updated document
     );
@@ -48,16 +69,16 @@ export class UserService {
   }
 
   async validateUser(
-    username: string,
+    email: string,
     password: string,
-  ): Promise<UserResponseDto | null> {
-    const user = await this.findOne({ username });
+  ): Promise<UserDocument | null> {
+    const user = await this.findOne({ email });
 
     if (!user || password !== user.password) {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    return this.mapToUserResponse(user);
+    return user;
   }
 
   async findAll(): Promise<UserResponseDto[]> {

@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './stratergy/local.stratergy';
 import { JwtStrategy } from './stratergy/jwt.stratergy';
 import { JwtRefreshStrategy } from './stratergy/jwt-refresh.stratergy';
+import { GoogleStrategy } from './stratergy/google.strategy';
 
 @Module({
   imports: [
@@ -23,7 +24,13 @@ import { JwtRefreshStrategy } from './stratergy/jwt-refresh.stratergy';
       inject: [ConfigService], // Inject ConfigService for dynamic configuration
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    JwtRefreshStrategy,
+    GoogleStrategy,
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}

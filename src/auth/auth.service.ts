@@ -15,7 +15,7 @@ export class AuthService {
   private async generateTokens(
     user: RequestUser,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const payload = { username: user.username, sub: user._id };
+    const payload = { username: user.email, sub: user._id };
 
     const accessToken = this.jwtService.sign(payload);
 
@@ -34,7 +34,7 @@ export class AuthService {
 
     // Store the refresh token securely (optionally hashed) in the database
     await this.userService.update({
-      username: user.username,
+      email: user.email,
       refreshToken: tokens.refreshToken,
     });
 
@@ -45,7 +45,7 @@ export class AuthService {
     user: RequestUser,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const userDb = await this.userService.findOne({
-      username: user.username,
+      email: user.email,
     });
 
     if (userDb.refreshToken !== user.refreshToken) {
@@ -56,7 +56,7 @@ export class AuthService {
 
     // Update the refresh token in the database
     await this.userService.update({
-      username: user.username,
+      email: user.email,
       refreshToken: newTokens.refreshToken,
     });
 
@@ -66,7 +66,7 @@ export class AuthService {
   // Logout method to remove the stored refresh token
   async logout(user: RequestUser): Promise<void> {
     await this.userService.update({
-      username: user.username,
+      email: user.email,
       refreshToken: null,
     });
   }

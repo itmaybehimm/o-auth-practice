@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { GoogleOAuthGuard } from './guards/google-oauth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -12,6 +13,18 @@ export class AuthController {
   @Post('login')
   async login(@Request() request) {
     // Access the user from the request object
+    return this.authService.login(request.user); // Pass the user to AuthService for JWT generation
+  }
+
+  @Get('google')
+  @UseGuards(GoogleOAuthGuard)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async googleAuth(@Request() request) {}
+
+  @Get('google-redirect')
+  @UseGuards(GoogleOAuthGuard)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  googleAuthRedirect(@Request() request) {
     return this.authService.login(request.user); // Pass the user to AuthService for JWT generation
   }
 

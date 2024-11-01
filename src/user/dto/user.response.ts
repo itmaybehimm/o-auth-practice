@@ -6,5 +6,5 @@ export class UserResponseDto {
   _id: Types.ObjectId;
 
   @Expose()
-  username: string;
+  email: string;
 }
